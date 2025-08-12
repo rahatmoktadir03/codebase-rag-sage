@@ -4,7 +4,7 @@ langchain-community
 openai
 groq
 tiktoken
-pinecone-client
+pinecone
 langchain_pinecone
 sentence-transformers
 streamlit

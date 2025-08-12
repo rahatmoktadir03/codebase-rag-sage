@@ -1,0 +1,10 @@
+pygithub
+langchain
+langchain-community
+openai
+groq
+tiktoken
+pinecone-client
+langchain_pinecone
+sentence-transformers
+streamlit

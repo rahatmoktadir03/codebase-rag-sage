@@ -1,7 +1,7 @@
 import streamlit as st
-from sentence_transformers import SentenceTransformer
 from langchain_pinecone import PineconeVectorStore
 from langchain.schema import Document
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from pinecone import Pinecone
 import os
 from groq import Groq
@@ -84,14 +84,14 @@ except Exception as e:
     st.stop()
 
 # ==============================
-# HuggingFace Embeddings
+# HuggingFace Embeddings (LangChain)
 # ==============================
 @st.cache_resource
 def get_huggingface_embeddings(model_name="sentence-transformers/all-mpnet-base-v2"):
     try:
-        return SentenceTransformer(model_name)
+        return HuggingFaceEmbeddings(model_name=model_name)
     except Exception as e:
-        st.error(f"Error loading Sentence Transformer model: {e}")
+        st.error(f"Error loading HuggingFace embeddings: {e}")
         st.stop()
 
 embeddings_model = get_huggingface_embeddings()
@@ -106,10 +106,10 @@ def perform_rag(query, namespace):
 
     try:
         client = Groq(api_key=groq_api_key)
-        raw_query_embedding = embeddings_model.encode(query)
+        raw_query_embedding = embeddings_model.embed_query(query)
 
         top_matches = pinecone_index.query(
-            vector=raw_query_embedding.tolist(),
+            vector=raw_query_embedding,
             top_k=5,
             include_metadata=True,
             namespace=namespace
@@ -150,7 +150,6 @@ if clone_button and repo_url:
             file_content = get_main_files_content(repo_path)
             namespace = repo_url
 
-            # Create LangChain docs
             documents = [
                 Document(
                     page_content=f"{file['name']}\n{file['content']}",
